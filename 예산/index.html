@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LUNEA STATION 2026 실행예산안 상세본">
+  <title>LUNEA STATION 2026 실행예산안</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --panel: #ffffff;
+      --text: #20232d;
+      --muted: #6f7583;
+      --line: #e3e6ed;
+      --accent: #6657d9;
+      --accent-dark: #5042c5;
+      --accent-soft: #efedff;
+      --nav: #191b24;
+      --nav-hover: #292c38;
+      --shadow: 0 14px 36px rgba(31, 34, 46, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+        "Malgun Gothic", Arial, sans-serif;
+    }
+
+    button,
+    input,
+    select,
+    a {
+      font: inherit;
+    }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 28px 17px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(111, 94, 232, 0.3), transparent 36%),
+        var(--nav);
+    }
+
+    .brand {
+      padding: 3px 10px 23px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+
+    .brand-kicker {
+      margin: 0 0 8px;
+      color: #bdb7ff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.3;
+      letter-spacing: -.04em;
+    }
+
+    .brand p:last-child {
+      margin: 10px 0 0;
+      color: #aeb4c2;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .nav-label {
+      margin: 22px 10px 10px;
+      color: #858c9e;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .14em;
+    }
+
+    .sheet-list {
+      display: grid;
+      gap: 5px;
+    }
+
+    .sheet-tab {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 11px;
+      color: #cfd3dd;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .sheet-tab:hover {
+      color: #fff;
+      background: var(--nav-hover);
+    }
+
+    .sheet-tab.active {
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .sheet-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 22px;
+      margin-right: 7px;
+      border-radius: 7px;
+      background: rgba(255,255,255,.12);
+      font-size: 10px;
+      font-weight: 800;
+      vertical-align: middle;
+    }
+
+    .sidebar-note {
+      margin: 22px 8px 0;
+      padding: 13px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px;
+      color: #abb1be;
+      background: rgba(255,255,255,.04);
+      font-size: 11px;
+      line-height: 1.65;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 34px clamp(16px, 4vw, 52px) 50px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      margin: 0 0 9px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .1em;
+    }
+
+    .header h2 {
+      margin: 0;
+      font-size: clamp(27px, 4vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -.055em;
+    }
+
+    .description {
+      max-width: 820px;
+      margin: 13px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .download-link {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border-radius: 11px;
+      padding: 0 15px;
+      color: #fff;
+      background: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      transition: .18s ease;
+    }
+
+    .download-link:hover {
+      background: var(--accent-dark);
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(190px, 320px);
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(245,246,250,.92);
+      backdrop-filter: blur(10px);
+    }
+
+    .mobile-select-wrap {
+      display: none;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 41px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0 12px;
+      outline: none;
+      color: var(--text);
+      background: var(--panel);
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(102,87,217,.13);
+    }
+
+    .sheet-panel {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .sheet-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 17px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fafafe;
+    }
+
+    .sheet-panel-header h3 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -.035em;
+    }
+
+    .sheet-meta {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .table-wrap {
+      max-height: calc(100vh - 170px);
+      overflow: auto;
+    }
+
+    table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    td,
+    th {
+      min-width: 95px;
+      max-width: 380px;
+      padding: 10px 11px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #fff;
+    }
+
+    tr:last-child td,
+    tr:last-child th {
+      border-bottom: 0;
+    }
+
+    td:last-child,
+    th:last-child {
+      border-right: 0;
+    }
+
+    tr:first-child td,
+    tr:first-child th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      color: #fff;
+      background: #343846;
+      font-weight: 800;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: #fafaff;
+    }
+
+    td[data-t="n"] {
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    a {
+      color: var(--accent-dark);
+    }
+
+    mark {
+      border-radius: 3px;
+      padding: 0 2px;
+      color: inherit;
+      background: #fff0a6;
+    }
+
+    .loading,
+    .error {
+      margin: 42px auto;
+      max-width: 720px;
+      padding: 28px;
+      border-radius: 16px;
+    }
+
+    .loading {
+      color: var(--muted);
+      background: var(--panel);
+      text-align: center;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      margin: 0 auto 14px;
+      border: 4px solid #e6e3ff;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .85s linear infinite;
+    }
+
+    .error {
+      border: 1px solid #f0c9cf;
+      color: #72333b;
+      background: #fff5f6;
+      line-height: 1.7;
+    }
+
+    .error strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 17px;
+    }
+
+    .footer {
+      margin-top: 17px;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: right;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 820px) {
+      .layout {
+        display: block;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        padding: 23px 13px 40px;
+      }
+
+      .header {
+        flex-direction: column;
+      }
+
+      .download-link {
+        width: 100%;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .mobile-select-wrap {
+        display: block;
+      }
+
+      .table-wrap {
+        max-height: none;
+      }
+
+      td,
+      th {
+        min-width: 110px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .sidebar,
+      .toolbar,
+      .download-link,
+      .footer {
+        display: none !important;
+      }
+
+      .layout {
+        display: block;
+      }
+
+      .main {
+        padding: 0;
+      }
+
+      .sheet-panel {
+        border: 0;
+        box-shadow: none;
+      }
+
+      .table-wrap {
+        max-height: none;
+        overflow: visible;
+      }
+
+      table {
+        width: 100%;
+        font-size: 9px;
+      }
+
+      td,
+      th {
+        min-width: auto;
+        max-width: none;
+        padding: 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <p class="brand-kicker">BTL CASE STUDY</p>
+        <h1>LUNEA STATION<br>실행예산안</h1>
+        <p>2026년 실제 공개가격과 견적 기준을 바탕으로 구성한 상세 예산 자료입니다.</p>
+      </div>
+
+      <p class="nav-label">WORKSHEETS</p>
+      <nav id="sheetList" class="sheet-list" aria-label="엑셀 시트 목록"></nav>
+
+      <div class="sidebar-note">
+        왼쪽의 시트명을 눌러 상세 내역을 확인할 수 있습니다. 표는 가로로 스크롤할 수 있습니다.
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="header">
+        <div>
+          <p class="eyebrow">LUNEA STATION · 2026</p>
+          <h2>실행예산안 상세본</h2>
+          <p class="description">
+            공간 대관부터 제작·시공·운영까지, LUNEA STATION 팝업스토어의 실행 항목과 산출 근거를 시트별로 정리했습니다.
+          </p>
+        </div>
+
+        <a
+          class="download-link"
+          href="LUNEA_STATION_2026_실행예산안_상세본_1-14.xlsx"
+          download
+        >원본 엑셀 다운로드</a>
+      </header>
+
+      <section class="toolbar" aria-label="표 보기 도구">
+        <div class="mobile-select-wrap">
+          <label for="sheetSelect">시트 선택</label>
+          <select id="sheetSelect"></select>
+        </div>
+
+        <div>
+          <label for="searchInput">현재 시트에서 검색</label>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="업체명, 항목명, 금액 등을 검색하세요"
+            autocomplete="off"
+          >
+        </div>
+      </section>
+
+      <section class="sheet-panel">
+        <div class="sheet-panel-header">
+          <h3 id="currentSheetTitle">불러오는 중</h3>
+          <span id="sheetMeta" class="sheet-meta"></span>
+        </div>
+
+        <div id="viewer" class="table-wrap">
+          <div class="loading">
+            <div class="spinner" aria-hidden="true"></div>
+            엑셀 데이터를 불러오고 있습니다.
+          </div>
+        </div>
+      </section>
+
+      <p class="footer">
+        LUNEA STATION은 BTL 기획 역량을 보여주기 위해 제작한 가상 브랜드 프로젝트입니다.
+      </p>
+    </main>
+  </div>
+
+  <script>
+    const EXCEL_FILE = "LUNEA_STATION_2026_실행예산안_상세본_1-14.xlsx";
+
+    const sheetList = document.getElementById("sheetList");
+    const sheetSelect = document.getElementById("sheetSelect");
+    const viewer = document.getElementById("viewer");
+    const currentSheetTitle = document.getElementById("currentSheetTitle");
+    const sheetMeta = document.getElementById("sheetMeta");
+    const searchInput = document.getElementById("searchInput");
+
+    let workbook = null;
+    let currentSheetName = "";
+    let originalTableHTML = "";
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function makeLinksClickable(root) {
+      const urlPattern = /(https?:\/\/[^\s<]+)/g;
+      const walker = document.createTreeWalker(
+        root,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode(node) {
+            if (!node.nodeValue.match(urlPattern)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (node.parentElement.closest("a, script, style")) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        }
+      );
+
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+
+      nodes.forEach((node) => {
+        const text = node.nodeValue;
+        const fragment = document.createDocumentFragment();
+        let lastIndex = 0;
+
+        text.replace(urlPattern, (url, _match, offset) => {
+          fragment.appendChild(document.createTextNode(text.slice(lastIndex, offset)));
+          const link = document.createElement("a");
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = url;
+          fragment.appendChild(link);
+          lastIndex = offset + url.length;
+        });
+
+        fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+        node.parentNode.replaceChild(fragment, node);
+      });
+    }
+
+    function countUsedCells(sheet) {
+      if (!sheet["!ref"]) return { rows: 0, cols: 0 };
+      const range = XLSX.utils.decode_range(sheet["!ref"]);
+      return {
+        rows: range.e.r - range.s.r + 1,
+        cols: range.e.c - range.s.c + 1
+      };
+    }
+
+    function createNavigation(sheetNames) {
+      sheetList.innerHTML = "";
+      sheetSelect.innerHTML = "";
+
+      sheetNames.forEach((name, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "sheet-tab";
+        button.dataset.sheet = name;
+        button.innerHTML =
+          `<span class="sheet-number">${String(index + 1).padStart(2, "0")}</span>${escapeHtml(name)}`;
+        button.addEventListener("click", () => renderSheet(name));
+        sheetList.appendChild(button);
+
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = `${index + 1}. ${name}`;
+        sheetSelect.appendChild(option);
+      });
+
+      sheetSelect.addEventListener("change", (event) => {
+        renderSheet(event.target.value);
+      });
+    }
+
+    function renderSheet(name) {
+      if (!workbook || !workbook.Sheets[name]) return;
+
+      currentSheetName = name;
+      searchInput.value = "";
+
+      document.querySelectorAll(".sheet-tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.sheet === name);
+      });
+
+      sheetSelect.value = name;
+      currentSheetTitle.textContent = name;
+
+      const sheet = workbook.Sheets[name];
+      const dimensions = countUsedCells(sheet);
+      sheetMeta.textContent = `${dimensions.rows.toLocaleString()}행 · ${dimensions.cols.toLocaleString()}열`;
+
+      originalTableHTML = XLSX.utils.sheet_to_html(sheet, {
+        id: "budgetTable",
+        editable: false
+      });
+
+      viewer.innerHTML = originalTableHTML;
+
+      const table = viewer.querySelector("table");
+      if (table) {
+        table.removeAttribute("border");
+        table.removeAttribute("cellpadding");
+        table.removeAttribute("cellspacing");
+        makeLinksClickable(table);
+      } else {
+        viewer.innerHTML = `
+          <div class="loading">
+            이 시트에는 표시할 데이터가 없습니다.
+          </div>
+        `;
+      }
+    }
+
+    function highlightSearch(term) {
+      if (!currentSheetName) return;
+
+      viewer.innerHTML = originalTableHTML;
+      const table = viewer.querySelector("table");
+
+      if (!table) return;
+
+      table.removeAttribute("border");
+      table.removeAttribute("cellpadding");
+      table.removeAttribute("cellspacing");
+      makeLinksClickable(table);
+
+      const query = term.trim();
+      if (!query) return;
+
+      const lowerQuery = query.toLocaleLowerCase("ko-KR");
+      const cells = table.querySelectorAll("td, th");
+
+      cells.forEach((cell) => {
+        if (cell.querySelector("a")) return;
+
+        const text = cell.textContent;
+        const lowerText = text.toLocaleLowerCase("ko-KR");
+        const index = lowerText.indexOf(lowerQuery);
+
+        if (index === -1) return;
+
+        const before = escapeHtml(text.slice(0, index));
+        const match = escapeHtml(text.slice(index, index + query.length));
+        const after = escapeHtml(text.slice(index + query.length));
+
+        cell.innerHTML = `${before}<mark>${match}</mark>${after}`;
+      });
+    }
+
+    searchInput.addEventListener("input", (event) => {
+      highlightSearch(event.target.value);
+    });
+
+    async function loadWorkbook() {
+      try {
+        if (typeof XLSX === "undefined") {
+          throw new Error("엑셀 뷰어 라이브러리를 불러오지 못했습니다.");
+        }
+
+        const response = await fetch(encodeURI(EXCEL_FILE));
+
+        if (!response.ok) {
+          throw new Error(`엑셀 파일을 찾을 수 없습니다. HTTP ${response.status}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+
+        workbook = XLSX.read(arrayBuffer, {
+          type: "array",
+          cellDates: true,
+          cellText: true,
+          cellNF: true
+        });
+
+        const visibleSheets = workbook.SheetNames.filter((name, index) => {
+          const props = workbook.Workbook?.Sheets?.[index];
+          return !props || props.Hidden !== 1;
+        });
+
+        if (!visibleSheets.length) {
+          throw new Error("표시할 수 있는 시트가 없습니다.");
+        }
+
+        createNavigation(visibleSheets);
+        renderSheet(visibleSheets[0]);
+      } catch (error) {
+        currentSheetTitle.textContent = "파일을 불러오지 못했습니다";
+        sheetMeta.textContent = "";
+        viewer.innerHTML = `
+          <div class="error">
+            <strong>엑셀 파일 연결을 확인해 주세요.</strong>
+            <div>
+              <code>index.html</code>과
+              <code>${escapeHtml(EXCEL_FILE)}</code>을
+              GitHub 저장소의 같은 위치에 올려야 합니다.
+            </div>
+            <div style="margin-top:8px;">오류 내용: ${escapeHtml(error.message)}</div>
+          </div>
+        `;
+      }
+    }
+
+    loadWorkbook();
+  </script>
+</body>
+</html>
